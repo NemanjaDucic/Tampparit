@@ -3,7 +3,6 @@ package com.example.tampparit.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.tampparit.adapters.AdminListAdapter
 import com.example.tampparit.helpers.Instances
 import com.example.tampparit.models.*
 import com.google.firebase.database.DataSnapshot
@@ -77,19 +76,17 @@ private val gson = Gson()
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     listOfDriverPoints.clear()
-                    for (l in dataSnapshot.children) {
-                        val json = gson.toJson(l.value)
-                        println(l)
-                        val data = Gson().fromJson(json, HelperModel::class.java)
-//                        listOfDriverPoints.add(data)
-                        println(data)
-                        println(json)
+                    for (snapshot in dataSnapshot.children) {
+                        for (snapPoint in snapshot.children) {
+                            snapPoint.getValue(LatLongModel::class.java)?.let {
+                                listOfDriverPoints.add(it)
+                            }
+                        }
                     }
-//                    _driverPointsLiveData.postValue(listOfDriverPoints)
+                    _driverPointsLiveData.postValue(listOfDriverPoints)
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-
                     println("Error")
                 }
             })

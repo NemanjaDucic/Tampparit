@@ -10,7 +10,6 @@ import com.example.tampparit.R
 import com.example.tampparit.interfaces.RemoveAdminInterface
 import com.example.tampparit.models.AdminModel
 
-
 class AdminListAdapter (
     private var adminNamesArray: ArrayList<AdminModel>,
     private val listener:RemoveAdminInterface
@@ -26,7 +25,7 @@ class AdminListAdapter (
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
-        holder.textView.text = adminNamesArray[position]?.name.toString()
+        holder.textView.text = adminNamesArray[position].name.toString()
         holder.button.setOnClickListener {
             listener.selectedAdmin(adminNamesArray[position].id.toString())
         }
