@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.mapbox.maps.MapView
+
+        xmlns:mapbox="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        mapbox:mapbox_cameraTargetLat="40.7128"
+        mapbox:mapbox_cameraTargetLng="-74.0060"
+        mapbox:mapbox_cameraZoom="9.0" />
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/comment_button"
+        android:layout_width="wrap_content"
+        android:padding="10dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/round_gray_background"
+        android:text="Leave A comment For Current Location"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_margin="20dp"/>
+    <EditText
+        android:padding="10dp"
+        android:layout_width="0dp"
+        android:layout_height="80dp"
+        android:lines="10"
+        android:textColorHint="@color/blue"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/saveButton"
+        android:hint="your comment"
+        android:layout_margin="10dp"
+        android:background="@drawable/map_et"
+
+        android:id="@+id/comment_et"/>
+    <EditText
+        android:padding="10dp"
+        android:layout_width="0dp"
+        android:layout_margin="10dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/comment_et"
+        android:hint="your name"
+        android:background="@drawable/map_et"
+        android:id="@+id/name_et"/>
+    <androidx.appcompat.widget.AppCompatButton
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="save"
+        android:background="@drawable/round_gray_background"
+        android:layout_margin="10dp"
+        android:id="@+id/saveButton"/>
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/driveButton"
+        android:layout_width="wrap_content"
+        android:padding="10dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/round_gray_background"
+        android:text="Start Driving"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/comment_button"
+        android:layout_margin="20dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

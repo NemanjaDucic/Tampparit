@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Tampparit</string>
+    <string name="mapbox_access_token">pk.eyJ1Ijoib2xsaWphcnZhIiwiYSI6ImNsZnY3NmJpZzA0aTMzZmxneDhjcG1jYW8ifQ.ZHC2A4tr5_jvw_VNQo9RfA</string>
+    <string name="empty">""</string>
+</resources>

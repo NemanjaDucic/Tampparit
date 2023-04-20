@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- Always include this permission -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- Include only if your app benefits from precise location access. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Tampparit"
+        tools:targetApi="31">
+        <activity
+            android:name=".ui.ActivityMap"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ui.MainActivity"/>
+        <activity android:name=".ui.admin.ActivityRegister"/>
+        <activity android:name=".ui.ActivityLogin"/>
+        <activity android:name=".ui.ActivityDetails"/>
+        <activity android:name=".ui.driver.ActivityDriver"/>
+        <activity android:name=".ui.driver.ActivityDriverDetails"/>
+        <activity android:name=".ui.admin.AdminActivity"/>
+        <activity android:name=".ui.headadmin.ActivityCreateAdmin"/>
+        <activity android:name=".ui.headadmin.ActivityAdminList"/>
+        <activity android:name=".ui.headadmin.ActivityHeadAdmin"/>
+        <activity android:name=".ui.headadmin.ActivityAdminDetails"/>
+    </application>
+
+</manifest>

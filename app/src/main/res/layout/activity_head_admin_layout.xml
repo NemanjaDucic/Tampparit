@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.MainActivity">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/headerHolder"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/darkGray"
+            android:text="Welcome"
+            android:id="@+id/welcomeTV"
+            android:textSize="32sp"
+            android:fontFamily="@font/ddinbold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/buttonHolder"
+        android:layout_width="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/headerHolder"
+        android:layout_height="0dp">
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/buttonCreateAdmin"
+            app:layout_constraintWidth_percent="0.4"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_width="0dp"
+            android:textColor="@color/white"
+            android:background="@drawable/round_gray_background"
+            app:layout_constraintBottom_toTopOf="@id/buttonDelete"
+            android:text="Create Admin"
+            android:layout_height="wrap_content"/>
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/buttonDelete"
+            app:layout_constraintWidth_percent="0.4"
+            android:textColor="@color/white"
+            android:text="Delete Admin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/buttonAdmin"
+            app:layout_constraintTop_toBottomOf="@id/buttonCreateAdmin"
+            android:background="@drawable/round_gray_background"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"/>
+        <androidx.appcompat.widget.AppCompatButton
+            android:text="Something"
+            app:layout_constraintWidth_percent="0.4"
+            app:layout_constraintTop_toBottomOf="@+id/buttonDelete"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:textColor="@color/white"
+            android:background="@drawable/round_gray_background"
+            android:id="@+id/buttonAdmin"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

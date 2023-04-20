@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "845751439137",
+    "project_id": "tampparitapp",
+    "storage_bucket": "tampparitapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:845751439137:android:28958c0ee1bc4acc65b860",
+        "android_client_info": {
+          "package_name": "com.example.tampparit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "845751439137-vkot8m9i9cjepo4nbg0ov6cst367uq5m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCYeUqi_7KH0ywphGribppyCAG9buwVT7w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "845751439137-vkot8m9i9cjepo4nbg0ov6cst367uq5m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
