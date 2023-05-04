@@ -3,6 +3,7 @@ package com.example.tampparit.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.tampparit.adapters.AdminListAdapter
 import com.example.tampparit.helpers.Instances
 import com.example.tampparit.models.*
 import com.google.firebase.database.DataSnapshot
@@ -15,9 +16,9 @@ private val gson = Gson()
     private var listOfA = ArrayList<AnnotationModel>()
     private var _aList = MutableLiveData<ArrayList<AnnotationModel>>()
     var aList = _aList as LiveData<ArrayList<AnnotationModel>>
-
+    private var driver = MutableLiveData<DriverModel>()
+    var livedataDriver = driver as LiveData<DriverModel>
     var user = AdminModel()
-
     private var listOfDriverPoints = ArrayList<LatLongModel>()
     private var _driverPointsLiveData = MutableLiveData<ArrayList<LatLongModel>>()
     var driverPointsLiveData = _driverPointsLiveData as LiveData<ArrayList<LatLongModel>>
@@ -72,21 +73,18 @@ private val gson = Gson()
                 })
         }
     fun getSingleDriverRouts(driverID:String) {
-        Instances.databaseInstance.child("drivers").child(driverID).child("points")
+
+        Instances.databaseInstance.child("drivers").child(driverID)
             .addValueEventListener(object : ValueEventListener {
+
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    listOfDriverPoints.clear()
-                    for (snapshot in dataSnapshot.children) {
-                        for (snapPoint in snapshot.children) {
-                            snapPoint.getValue(LatLongModel::class.java)?.let {
-                                listOfDriverPoints.add(it)
-                            }
-                        }
-                    }
-                    _driverPointsLiveData.postValue(listOfDriverPoints)
+                    val json = gson.toJson(dataSnapshot.value)
+                    val data = Gson().fromJson(json, DriverModel::class.java)
+                   driver.postValue(data)
                 }
 
                 override fun onCancelled(error: DatabaseError) {
+
                     println("Error")
                 }
             })

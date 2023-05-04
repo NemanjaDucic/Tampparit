@@ -2,7 +2,7 @@ package com.example.tampparit.models
 
 import android.os.Parcel
 import android.os.Parcelable
-
+@kotlinx.serialization.Serializable
 data class LatLongModel(
     var latitude : Double ?= 0.0,
     var longitude:Double ?= 0.0

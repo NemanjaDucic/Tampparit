@@ -9,6 +9,7 @@
 
     <application
         android:allowBackup="true"
+        android:name=".CoreApp"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -25,6 +26,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity android:name=".ui.MainActivity"/>
         <activity android:name=".ui.admin.ActivityRegister"/>
         <activity android:name=".ui.ActivityLogin"/>

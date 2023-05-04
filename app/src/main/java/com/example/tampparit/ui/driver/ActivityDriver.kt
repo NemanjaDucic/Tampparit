@@ -21,6 +21,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
+import com.example.tampparit.CoreApp
 import com.example.tampparit.R
 import com.example.tampparit.databinding.ActivityDriverLayoutBinding
 import com.example.tampparit.helpers.Instances
@@ -29,6 +30,7 @@ import com.example.tampparit.helpers.LocationPermissionHelper
 import com.example.tampparit.models.AnnotationModel
 import com.example.tampparit.models.DriverModel
 import com.example.tampparit.models.LatLongModel
+import com.example.tampparit.observers.AppLifecycleObserver
 import com.example.tampparit.viewmodel.MainViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -57,12 +59,13 @@ import kotlin.collections.ArrayList
 
 class ActivityDriver:AppCompatActivity(), LocationListener {
     private lateinit var binding:ActivityDriverLayoutBinding
+    private lateinit var appLifecycleObserver: AppLifecycleObserver
+
     private lateinit var locationPermissionHelper: LocationPermissionHelper
     private val onIndicatorBearingChangedListener = OnIndicatorBearingChangedListener {
         mapView.getMapboxMap().setCamera(CameraOptions.Builder().bearing(it).build())
     }
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-
     private lateinit var viewModel:MainViewModel
     private val onIndicatorPositionChangedListener = OnIndicatorPositionChangedListener {
         mapView.getMapboxMap().setCamera(CameraOptions.Builder().center(it).build())
@@ -92,6 +95,8 @@ class ActivityDriver:AppCompatActivity(), LocationListener {
 
         binding = ActivityDriverLayoutBinding.inflate(layoutInflater)
         mapView = binding.mapView
+        appLifecycleObserver = AppLifecycleObserver(applicationContext)
+
         setContentView(binding.root)
         locationPermissionHelper = LocationPermissionHelper(WeakReference(this))
         locationPermissionHelper.checkPermissions {
@@ -190,12 +195,18 @@ class ActivityDriver:AppCompatActivity(), LocationListener {
             if (flag == true){
                 binding.driveButton.text = "Stop Driving"
                 startDriving()
+
                 flag = false
             } else {
                 binding.driveButton.text = "Start Driving"
                 flag = true
             }
-
+        var temp = ArrayList<LatLongModel>()
+            for (i in driver.points!!){
+                temp.clear()
+                temp.addAll(i.value.values)
+                println(temp)
+            }
         }
     }
     private fun startDriving(){
@@ -225,7 +236,7 @@ class ActivityDriver:AppCompatActivity(), LocationListener {
             delay(1000)
             Instances.databaseInstance
                 .child("drivers").child(driver.id!!).child("points").child(saidID.toString()).push().setValue(LatLongModel(lat,long))
-            startTimer( 10, saidID = saidID.toString())
+            startTimer( 3, saidID = saidID.toString())
         }
     }
     private fun startTimer(start: Long,saidID:String) {
@@ -238,14 +249,21 @@ class ActivityDriver:AppCompatActivity(), LocationListener {
                 getLocation()
                 Instances.databaseInstance
                     .child("drivers").child(driver.id!!).child("points").child(saidID).push().setValue(LatLongModel(lat,long)).addOnCompleteListener {
+                        CoreApp.driverIDString = driver.id!!
+                        CoreApp.randomID = saidID
                         viewModel.getSingleDriverRouts(driver.id!!)
-                        viewModel.driverPointsLiveData.observe(this@ActivityDriver){
-                                value ->
-                            addPolilineAnnotations(value)
+                        viewModel.livedataDriver.observe(this@ActivityDriver){
+                                driver ->
+                            var temp = kotlin.collections.ArrayList<LatLongModel>()
+                            for (i in driver.points!!){
+                               temp.clear()
+                                temp.addAll(i.value.values)
+                                addPolylineAnnotations(temp)
 
+                            }
                         }
                         if (flag == false){
-                        startTimer(10,saidID)
+                        startTimer(3,saidID)
                          } else {
                              Toast.makeText(this@ActivityDriver,"Your Shift Is Over",Toast.LENGTH_SHORT).show()
                          }
@@ -254,17 +272,17 @@ class ActivityDriver:AppCompatActivity(), LocationListener {
             }
         }.start()
     }
-    private fun addPolilineAnnotations(point:ArrayList<LatLongModel>){
+    private fun addPolylineAnnotations(point:ArrayList<LatLongModel>){
         val annotationApi = mapView?.annotations
-        val points = arrayListOf<Point>()
-        for (i in point) {
-         val geo = (Point.fromLngLat(i.longitude!!,i.latitude!!))
-            points.add(geo)
-        }
+        var tempList = ArrayList<Point>()
+        tempList.clear()
+       for ( i in point){
+           i.latitude?.let { i.longitude?.let { it1 -> Point.fromLngLat(it1, it) } }?.let { tempList.add(it) }
+       }
 
-        val polylineAnnotationManager = annotationApi?.createPolylineAnnotationManager(mapView!!)
+        val polylineAnnotationManager = annotationApi?.createPolylineAnnotationManager()
         val polylineAnnotationOptions: PolylineAnnotationOptions = PolylineAnnotationOptions()
-            .withPoints(points)
+            .withPoints(tempList)
             // Style the line that will be added to the map.
             .withLineColor("#FF000000")
             .withLineWidth(3.0)
@@ -356,6 +374,8 @@ class ActivityDriver:AppCompatActivity(), LocationListener {
         mapView.location
             .removeOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
         mapView.gestures.removeOnMoveListener(onMoveListener)
+        lifecycle.removeObserver(appLifecycleObserver)
+
         mapView.onDestroy()
     }
 
