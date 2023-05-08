@@ -24,7 +24,7 @@ class AppLifecycleObserver(private val context:Context) : LifecycleObserver {
         fbHandler = Handler(Looper.getMainLooper())
         fbHandler?.postDelayed({
             WorkManager.getInstance(context).enqueue(updateRequest)
-        }, 3000L)
+        }, 3000)
     }
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun onAppForegrounded() {

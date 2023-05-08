@@ -1,6 +1,7 @@
 package com.example.tampparit.ui.driver
 
 import android.Manifest
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -11,13 +12,16 @@ import android.graphics.drawable.Drawable
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.ActivityCompat
+import androidx.core.app.ServiceCompat.*
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
@@ -31,6 +35,8 @@ import com.example.tampparit.models.AnnotationModel
 import com.example.tampparit.models.DriverModel
 import com.example.tampparit.models.LatLongModel
 import com.example.tampparit.observers.AppLifecycleObserver
+import com.example.tampparit.service.MyBackgroundService
+import com.example.tampparit.service.MyForegroundService
 import com.example.tampparit.viewmodel.MainViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -59,8 +65,7 @@ import kotlin.collections.ArrayList
 
 class ActivityDriver:AppCompatActivity(), LocationListener {
     private lateinit var binding:ActivityDriverLayoutBinding
-    private lateinit var appLifecycleObserver: AppLifecycleObserver
-
+    private lateinit var myServiceIntent: Intent
     private lateinit var locationPermissionHelper: LocationPermissionHelper
     private val onIndicatorBearingChangedListener = OnIndicatorBearingChangedListener {
         mapView.getMapboxMap().setCamera(CameraOptions.Builder().bearing(it).build())
@@ -92,16 +97,21 @@ class ActivityDriver:AppCompatActivity(), LocationListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
+        locationPermissionHelper = LocationPermissionHelper(WeakReference(this))
         binding = ActivityDriverLayoutBinding.inflate(layoutInflater)
         mapView = binding.mapView
-        appLifecycleObserver = AppLifecycleObserver(applicationContext)
+        myServiceIntent = Intent(this, MyForegroundService::class.java)
+
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         setContentView(binding.root)
-        locationPermissionHelper = LocationPermissionHelper(WeakReference(this))
+
+
         locationPermissionHelper.checkPermissions {
-            onMapReady()
+            // permissions granted, do something
         }
+
+
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         viewModel.getAnnotations()
         getDriver()
@@ -175,9 +185,7 @@ class ActivityDriver:AppCompatActivity(), LocationListener {
         binding.commentButton.setOnClickListener {
             binding.commentEt.isVisible = true
             binding.saveButton.isVisible = true
-
             getLocation()
-
         }
         binding.saveButton.setOnClickListener {
             val random = UUID.randomUUID()
@@ -201,11 +209,10 @@ class ActivityDriver:AppCompatActivity(), LocationListener {
                 binding.driveButton.text = "Start Driving"
                 flag = true
             }
-        var temp = ArrayList<LatLongModel>()
+            var temp = ArrayList<LatLongModel>()
             for (i in driver.points!!){
                 temp.clear()
                 temp.addAll(i.value.values)
-                println(temp)
             }
         }
     }
@@ -237,9 +244,11 @@ class ActivityDriver:AppCompatActivity(), LocationListener {
             Instances.databaseInstance
                 .child("drivers").child(driver.id!!).child("points").child(saidID.toString()).push().setValue(LatLongModel(lat,long))
             startTimer( 3, saidID = saidID.toString())
+
         }
     }
     private fun startTimer(start: Long,saidID:String) {
+        val sharedPreferences = getSharedPreferences("MyPreferences", Context.MODE_PRIVATE)
 
         object : CountDownTimer(start * 1000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
@@ -251,24 +260,27 @@ class ActivityDriver:AppCompatActivity(), LocationListener {
                     .child("drivers").child(driver.id!!).child("points").child(saidID).push().setValue(LatLongModel(lat,long)).addOnCompleteListener {
                         CoreApp.driverIDString = driver.id!!
                         CoreApp.randomID = saidID
+                        val editor = sharedPreferences.edit()
+                        editor.putString("driverid", driver.id)
+                        editor.putString("id", saidID)
+                        editor.apply()
                         viewModel.getSingleDriverRouts(driver.id!!)
                         viewModel.livedataDriver.observe(this@ActivityDriver){
                                 driver ->
                             var temp = kotlin.collections.ArrayList<LatLongModel>()
                             for (i in driver.points!!){
-                               temp.clear()
+                                temp.clear()
                                 temp.addAll(i.value.values)
                                 addPolylineAnnotations(temp)
 
                             }
                         }
                         if (flag == false){
-                        startTimer(3,saidID)
-                         } else {
-                             Toast.makeText(this@ActivityDriver,"Your Shift Is Over",Toast.LENGTH_SHORT).show()
-                         }
+                            startTimer(3,saidID)
+                        } else {
+                            Toast.makeText(this@ActivityDriver,"Your Shift Is Over",Toast.LENGTH_SHORT).show()
+                        }
                     }
-
             }
         }.start()
     }
@@ -276,9 +288,9 @@ class ActivityDriver:AppCompatActivity(), LocationListener {
         val annotationApi = mapView?.annotations
         var tempList = ArrayList<Point>()
         tempList.clear()
-       for ( i in point){
-           i.latitude?.let { i.longitude?.let { it1 -> Point.fromLngLat(it1, it) } }?.let { tempList.add(it) }
-       }
+        for ( i in point){
+            i.latitude?.let { i.longitude?.let { it1 -> Point.fromLngLat(it1, it) } }?.let { tempList.add(it) }
+        }
 
         val polylineAnnotationManager = annotationApi?.createPolylineAnnotationManager()
         val polylineAnnotationOptions: PolylineAnnotationOptions = PolylineAnnotationOptions()
@@ -289,10 +301,26 @@ class ActivityDriver:AppCompatActivity(), LocationListener {
         polylineAnnotationManager?.create(polylineAnnotationOptions)
 
     }
+    private fun isServiceRunning(serviceClass: Class<*>): Boolean {
+        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        for (service in activityManager.getRunningServices(Int.MAX_VALUE)) {
+            if (serviceClass.name == service.service.className) {
+                return true
+            }
+        }
+        return false
+    }
+    private fun stopForegroundServiceIfNeeded() {
+        if (isServiceRunning(MyForegroundService::class.java)) {
+            stopService(myServiceIntent)
+            stopForeground(myServiceIntent,0)
+
+
+        }
+    }
     private fun getDriver(){
         val id =   Instances.authInstance.currentUser?.uid
         Instances.databaseInstance.child("drivers").child(id!!).get().addOnSuccessListener {
-
             val json = gson.toJson(it.value)
             driver = Gson().fromJson(json, DriverModel::class.java)
         }
@@ -374,33 +402,37 @@ class ActivityDriver:AppCompatActivity(), LocationListener {
         mapView.location
             .removeOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
         mapView.gestures.removeOnMoveListener(onMoveListener)
-        lifecycle.removeObserver(appLifecycleObserver)
-
         mapView.onDestroy()
     }
 
     override fun onResume() {
         super.onResume()
-
+        stopForegroundServiceIfNeeded()
 
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        locationPermissionHelper.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
+
+
+
     override fun onStart() {
         super.onStart()
         mapView?.onStart()
     }
 
+    override fun onPause() {
+        super.onPause()
+//        val intent = Intent(this, MyForegroundService::class.java)
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            startForegroundService(intent)
+//        } else {
+//            startService(intent)
+//        }
+
+    }
     override fun onStop() {
         super.onStop()
         mapView?.onStop()
+
     }
 
 
@@ -409,6 +441,15 @@ class ActivityDriver:AppCompatActivity(), LocationListener {
         mapView?.onLowMemory()
     }
 
-
-
+    override fun onRestart() {
+        super.onRestart()
+    }
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        locationPermissionHelper.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
 }

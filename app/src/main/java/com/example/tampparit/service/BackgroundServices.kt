@@ -1,25 +1,56 @@
-package com.example.tampparit.workers
-
+package com.example.tampparit.service
 import android.Manifest
+import android.app.Service
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.os.Handler
+import android.os.IBinder
 import androidx.core.app.ActivityCompat
-import androidx.work.Worker
-import androidx.work.WorkerParameters
 import com.example.tampparit.CoreApp
 import com.example.tampparit.helpers.Instances
 import com.example.tampparit.models.LatLongModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import java.util.*
+class MyBackgroundService : Service() {
 
-class FirebaseBackgroundWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
-    private  var fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(applicationContext)
-    override fun doWork(): Result {
-        updateLocation()
-        return Result.success()
+    private val timer = Timer()
+    private val handler = Handler()
+
+    override fun onCreate() {
+        super.onCreate()
     }
-    private fun updateLocation() {
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        startTimer()
+        return START_STICKY
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopTimer()
+    }
+
+    private fun startTimer() {
+        timer.scheduleAtFixedRate(object : TimerTask() {
+            override fun run() {
+                handler.post {
+                    sendUpdates()
+                }
+            }
+        }, 0, 3000)
+    }
+
+    private fun stopTimer() {
+        timer.cancel()
+    }
+
+    private fun sendUpdates() {
+        val sharedPreferences = getSharedPreferences("MyPreferences", Context.MODE_PRIVATE)
+          var fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(applicationContext)
+
         if (ActivityCompat.checkSelfPermission(
                 applicationContext,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -43,10 +74,13 @@ class FirebaseBackgroundWorker(context: Context, params: WorkerParameters) : Wor
                 // Do something with the location
                 val latitude = location.latitude
                 val longitude = location.longitude
-                Instances.databaseInstance.child(CoreApp.driverIDString).child("points")
-                    .child(CoreApp.randomID).push().setValue(LatLongModel(latitude, longitude))
+                Instances.databaseInstance.child(sharedPreferences.getString("driverid","").toString()).child("points")
+                    .child(sharedPreferences.getString("id","").toString()).push().setValue(LatLongModel(latitude, longitude))
             }
         }
-        println("stojan")
+    }
+
+    override fun onBind(intent: Intent?): IBinder? {
+        return null
     }
 }

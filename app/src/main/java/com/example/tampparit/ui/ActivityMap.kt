@@ -313,6 +313,13 @@ class ActivityMap:AppCompatActivity(), LocationListener {
         mapView?.onStop()
     }
 
+    override fun onResume() {
+        super.onResume()
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+    }
 
     override fun onLowMemory() {
         super.onLowMemory()

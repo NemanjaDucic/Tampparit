@@ -3,9 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools">
     <!-- Always include this permission -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- Include only if your app benefits from precise location access. -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:allowBackup="true"
@@ -38,6 +39,8 @@
         <activity android:name=".ui.headadmin.ActivityAdminList"/>
         <activity android:name=".ui.headadmin.ActivityHeadAdmin"/>
         <activity android:name=".ui.headadmin.ActivityAdminDetails"/>
+        <service android:name=".service.MyBackgroundService" />
+        <service android:name=".service.MyForegroundService"/>
     </application>
 
 </manifest>
